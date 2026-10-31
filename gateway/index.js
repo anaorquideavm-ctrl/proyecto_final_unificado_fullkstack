@@ -12,12 +12,18 @@ app.use(cors());
 
 app.use('/api/auth', createProxyMiddleware({
   target: AUTH_SERVICE,
-  changeOrigin: true
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/auth': '' // Remueve /api/auth al reenviar la petición
+  }
 }));
 
-app.use('/api/productos', createProxyMiddleware({
+app.use('/productos', createProxyMiddleware({
   target: PRODUCTOS_SERVICE,
-  changeOrigin: true
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/productos': '' // Remueve /api/productos al reenviar la petición
+  }
 }));
 
 app.get('/health', (req, res) => {
