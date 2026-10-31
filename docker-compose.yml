@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  gateway:
+    build: ./gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - AUTH_SERVICE_URL=http://auth-service:4001
+      - PRODUCTOS_SERVICE_URL=http://productos-service:4002
+    depends_on:
+      - auth-service
+      - productos-service
+
+  auth-service:
+    build: ./servicios/auth
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - JWT_SECRET=supersecretkey_reposteria
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - DB_USER=sa
+      - DB_PASSWORD=YourPassword123!
+      - DB_SERVER=sqlserver-auth
+      - DB_NAME=AuthDB
+    depends_on:
+      - sqlserver-auth
+      - rabbitmq
+
+  productos-service:
+    build: ./servicios/productos
+    ports:
+      - "4002:4002"
+    environment:
+      - PORT=4002
+      - JWT_SECRET=supersecretkey_reposteria
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - DB_USER=sa
+      - DB_PASSWORD=YourPassword123!
+      - DB_SERVER=sqlserver-productos
+      - DB_NAME=ProductosDB
+      - MONGO_URI=mongodb://mongo:27017/resenas_db
+    depends_on:
+      - sqlserver-productos
+      - mongo
+      - rabbitmq
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  sqlserver-auth:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourPassword123!
+    ports:
+      - "1433:1433"
+
+  sqlserver-productos:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourPassword123!
+    ports:
+      - "1434:1433"
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
