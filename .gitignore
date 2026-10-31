@@ -6,7 +6,7 @@
 .env.development.local/
 .env.test.local/
 .env.production.local/
-*.env
+*.env/
 
 # ==========================================
 # 2. Dependencias de Node.js (Servicios y Frontend)
